@@ -1,0 +1,29 @@
+# The root Lake project of a Superpermutation Almanac batch submission.
+name = "almanac_submission"
+
+# The four reserved Almanac libraries, with their files at the repository root: each has only its name
+# and no srcDir. The judge overwrites AlmanacDefs.lean, AlmanacStatement.lean and AlmanacChallenge.lean
+# with its own, so your copies matter only for your own builds. AlmanacStatement and AlmanacChallenge are
+# placeholders that a batch does not use; the judge builds its Challenge from the statements in
+# AlmanacSolution.lean.
+[[lean_lib]]
+name = "AlmanacDefs"
+
+[[lean_lib]]
+name = "AlmanacStatement"
+
+[[lean_lib]]
+name = "AlmanacChallenge"
+
+[[lean_lib]]
+name = "AlmanacSolution"
+
+[[lean_lib]]
+name = "HaruhiFourteenProofs"
+roots = []
+globs = ["Challenge", "FrozenStatement", "LitBound.+", "LowerChallenge", "RefinedLowerChallenge", "ReturnOneAnchors", "ReturnOneDescent", "ReturnOneMap", "RunBound.+", "SuperpermutationLowerBound.+", "TileLoss", "alternation.+", "bridge.+", "pairs.+"]
+
+[[require]]
+name = "mathlib"
+git = "https://github.com/leanprover-community/mathlib4"
+rev = "56a005855ea17e0b0958f73ec801ae140b0a1679"

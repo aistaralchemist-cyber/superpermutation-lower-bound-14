@@ -1,0 +1,123 @@
+\documentclass[11pt]{article}
+\usepackage{amsmath,amssymb,booktabs,geometry,xcolor,hyperref}
+\geometry{a4paper,top=25mm,bottom=25mm,left=26mm,right=26mm,headheight=14pt}
+\definecolor{linkink}{RGB}{19,73,85}
+\hypersetup{colorlinks=true,urlcolor=linkink,citecolor=linkink,linkcolor=linkink,
+ pdftitle={A finite-state lower bound for superpermutations on fourteen symbols},
+ pdfauthor={Jaehun Jung},pdfsubject={A lower bound from chain packing and a verified fourteen-symbol construction}}
+\urlstyle{same}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newenvironment{proof}[1][Proof]{\par\smallskip\noindent\textit{#1.}\enspace}{\unskip\nobreak\hfill\ensuremath{\square}\par\smallskip}
+\setlength{\emergencystretch}{2em}
+\pagestyle{myheadings}
+\markright{\small J. Jung\hfill A finite-state lower bound on fourteen symbols\hspace{1.2em}}
+\title{A finite-state lower bound for superpermutations on fourteen symbols}
+\author{Jaehun Jung\\[4pt]{\small Independent Researcher, Republic of Korea}}
+\date{24 November 2026}
+\begin{document}
+\maketitle
+\begin{abstract}
+Let $L(14)$ be the shortest length of a word containing all $14!$ permutations of fourteen symbols as contiguous factors. We prove $L(14)\ge93\,891\,141\,157$, improving the lower endpoint listed in the Superpermutation Almanac on 24 November 2026 by seven. In Pantone's chain-packing framework, 32 forbidden factors encode repeated rotation classes. An integer potential on 1,596 suffix states then bounds the total loss of any admissible sequence of chain lengths. The resulting lower bound is formalized in Lean for arbitrary words. Combined with Pantone's construction W-0154, it leaves an interval of width $13\,567\,503$. We also exhibit a 41-letter shortening of Halfar's W-0135 and verify the resulting word by checking a complete run of rotations in every cyclic class.
+\end{abstract}
+
+\noindent\textit{Keywords.} Superpermutations, words, forbidden factors, finite automata, computer-assisted proof.
+
+\section{Introduction}
+A \emph{superpermutation} on an alphabet of size $n$ is a word containing every permutation of the alphabet as a contiguous factor. Write $L(n)$ for its minimum possible length. The Haruhi viewing problem has $n=14$: a single episode sequence must contain all $14!$ orders as uninterrupted fourteen-episode stretches. Two consecutive orders can share many letters. For instance, writing the first permutation followed by its first symbol also spells its left cyclic shift, at a cost of only one extra letter.
+
+The suffix--prefix overlap formulation has been used to construct short words, including Houston's counterexample to the factorial-sum conjecture at six symbols~\cite{houston}. For the lower bound here we use Pantone's chain-packing theory~\cite{pantone}. The argument starts from the fact that a path through distinct rotation classes has only limited freedom to repeat its most economical patterns. We identify incompatible patterns, bound their cumulative effect by a finite-state calculation and transfer the resulting packing constants back to the length of every fourteen-symbol word.
+
+Our main result and the independently published upper construction give
+\[
+     93\,891\,141\,157\ \le L(14)\ \le 93\,904\,708\,660 .
+\]
+The upper endpoint is Pantone's W-0154~\cite{w154}. Section~\ref{sec:lower} proves the lower inequality. Section~\ref{sec:construction} describes a reproducible rearrangement of an earlier word, W-0135. Its direct coverage check illustrates a different use of rotation classes: a long word can be verified by certifying one complete rotation run for each class.
+\section{From rotation-class geometry to a global bound}
+\label{sec:lower}
+
+\begin{theorem}\label{thm:fourteen-lower}
+Every word over fourteen symbols containing each permutation as a contiguous factor has length at least $93\,891\,141\,157$.
+\end{theorem}
+
+\subsection{Overlap paths, runs and chains}
+For distinct permutations $u,v$, the overlap weight is fourteen minus the length of the longest suffix of $u$ that is a prefix of $v$. It equals the number of new symbols needed to append $v$ after $u$. The rotations of one permutation form a class of fourteen vertices. Traversing a class in cyclic order uses thirteen consecutive edges of weight one; this sequence of fourteen vertices is a complete block.
+
+We use the reduction of Pantone~\cite{pantone} from arbitrary words to block-aligned paths. In such a path a \emph{run} consists of consecutive complete blocks, maximal subject to every interblock boundary having weight two. Each block occupies one slot of its run and corresponds to a rotation class. No two distinct slots of these paths occupy the same class. A \emph{light segment} consists of consecutive runs joined by boundaries of weight three. If a run contains $r$ blocks, its deficit is $13-r$; a full run has deficit zero. These are the run and light-segment definitions in Sections 4 and 5 of the pinned formalization~\cite{pantone}.
+
+The packing theorem tests portions of a light segment whose deficit sequence contains a factor
+\[
+   0\,2\,Z(g_1)\,2\,Z(g_2)\,2\cdots Z(g_j)\,2\,0,
+   \qquad  g_i\in\{9,10\}.
+\]
+Here $Z(g)$ denotes a string of $g$ consecutive zero deficits. Consecutive occurrences of $2$ separated by ten zeros belong to the same \emph{chain}; a gap of nine zeros starts the next chain. A chain's length counts its occurrences of $2$. Hence $q=1+\#\{i:g_i=9\}$ is the number of chains and the sum $S$ of their lengths equals $j+1$. The two binary cell types used below record a $2$ followed by a long or short gap. This is the case $a=11$ of \texttt{Refinement.ChainPacking} and \texttt{Refinement.ChainEncoding}.
+
+\subsection{A weighted language of chain lengths}
+The greedy decomposition of~\cite{pantone} groups adjacent chain lengths into singletons and pairs. Its interior singletons have length at most~4, and an interior pair $(a,b)$ satisfies $a\le35$ and $b\le3$. For a group of $j$ chains of total length $s$, define its loss as $19j-s$. The sole interior pair with zero loss and the two with unit loss are
+\[
+ E=(35,3),\qquad X=(34,3),\qquad Y=(35,2).
+\]
+Encode all remaining groups by $O$. Assign the encoded losses $\ell(E)=0$, $\ell(X)=\ell(Y)=1$, $\ell(O)=2$. These bounds follow directly from the allowed lengths. Every other pair has total length at most~36, and an interior singleton loses at least~15.
+
+The geometric restrictions limit the frequency with which the inexpensive pairs can recur. The certificate excludes a list $\mathcal F$ of 32 factors, beginning with $E^{15}$, $EXE^{14}$, $EYE^{14}$ and $EXE^{13}XE$. Seven exclusions are inherited from earlier stages of the construction. The additional 25 compare explicit slots. For example, one newly excluded factor is
+\[
+                         Y E^{13} X E^{11} Y E .
+\]
+For this factor, the prefixes of lengths 11 and 1,052 in its binary cell encoding each lead to a specified run. After the first prefix take run offset~3 and slot~8. After the second take run offset~0 and slot~0, with offsets and slots numbered from zero. The first run precedes the second. The two slot entries agree in all fourteen coordinates after expressing each entry in the coordinates of the initial permutation. This forces equality of their rotation classes for every labelling of the segment. The verification in \texttt{Next14.Pattern06} handles both values of the following cell. The other slot certificates likewise specify a pair of positions, prove the required strict order and compare all coordinates. The terminal part of a chain list is treated separately so that a following cell is available.
+
+\begin{lemma}\label{lem:fourteen-price}
+If a word of $m$ encoded groups contains no member of $\mathcal F$ and has total encoded loss $d$, then $8m\le107d+132$.
+\end{lemma}
+\begin{proof}
+The accompanying table has 1,596 states labelled by suffixes of the input read so far, and supplies a potential $P$ on these states. At the initial state $P=0$, and all potentials are at most~132. For each state $s$ and next letter $z$, a rejected transition exhibits a member of $\mathcal F$ as a suffix of the label of $s$ followed by $z$. An accepted transition gives a state $t$ whose label is a suffix of that same word and satisfies
+\[
+                          8+P(s)\le107\ell(z)+P(t).
+\]
+Lean checks these alternatives for all $1{,}596\cdot4=6{,}384$ entries. Of these, 83 transitions reject a forbidden suffix. Along a word avoiding $\mathcal F$ the rejected alternative is impossible by induction on the prefix. Summing the accepted inequalities cancels all intermediate potentials and proves the claim.
+\end{proof}
+
+\begin{proof}[Proof of Theorem~\ref{thm:fourteen-lower}]
+For $q\ge2$, the greedy decomposition separates an interior prefix of $m$ groups, to which Lemma~\ref{lem:fourteen-price} applies, and a tail of at most two groups. The terminal estimates in the chain decomposition give the tail actual loss at least $-16$. Since a group contains at most two chains, $q\le2(m+2)$. Adding losses across all groups now gives
+\[
+  19q-S\ \ge\ d-16\ \ge\ \frac{8m-132}{107}-16
+                   \ \ge\ \frac{4q-1860}{107}.
+\]
+Equivalently,
+\[
+       2S\le \frac{7778}{107}+\frac{4058}{107}(q-1).
+\]
+For a single chain the separate bound $S\le36$ suffices. The resulting packing parameters are $3889/107$ and $4058/107$. Substitution in the admissible-packing transfer of~\cite{pantone} yields
+\[
+  11+15\cdot13!+
+  \left\lceil\frac{69\,157\,292\,976\,563}{142\,349}\right\rceil
+  =93\,405\,312\,011+485\,829\,146
+  =93\,891\,141\,157 .
+\]
+The Lean theorem \texttt{Next.word\_lower} states the result for every word on \texttt{Fin 14}. Its prefix price, geometric transfer and unrestricted endpoint are in \texttt{Next14.PricePages}, \texttt{Next14.Transfer} and \texttt{Next14.Endpoint}, respectively.
+\end{proof}
+
+\section{A verified rearrangement of W-0135}
+\label{sec:construction}
+
+The construction in the supplement starts from Jakub Halfar's W-0135, itself derived from Jay Pantone's W-0127~\cite{almanac}. At each of 198 cuts, let $p$ and $p+g$ be the designated starts of two length-14 permutation occurrences. The left piece ends at $p+13$ and the right piece starts at $p+g$. Reordering the resulting 199 pieces increases the sum of their verified suffix--prefix overlaps from 534 to 575. All the original occurrences wholly contained in a piece survive. A permutation window crossing a cut and contained in neither adjacent piece must start at one of $p+1,\ldots,p+g-1$. Across all cuts, 64 such windows are permutations. A retained piece contains an identical occurrence in each case. Thus the reordered pieces save 41 letters and preserve coverage.
+
+The theorem \texttt{UpperNext.patched} proves preservation and the length saving under the source coverage and endpoint-data hypotheses. A separate checker compares all 199 prefix/suffix pairs with the authenticated source word. An independent coverage test also operates directly on the final compressed candidate. Fourteen consecutive windows that are permutations give all rotations of one permutation since the next letter in a one-position shift must replace the symbol just deleted. Rotate each observed class so that a fixed symbol comes first, then compute the Lehmer rank of the remaining thirteen symbols. A marked rank therefore certifies fourteen permutation occurrences. The verifier found all $13!=6\,227\,020\,800$ ranks and checked the decoded length $93\,904\,739\,731$ and SHA-256 digest. This accounts for all $14!=87\,178\,291\,200$ permutations. The input, reordering and decoded-word digests are provided with the verification records.
+
+\paragraph{Comparison with W-0154.}
+W-0135 has length $93\,904\,739\,772$. Our rearrangement has length $93\,904\,739\,731$. The Almanac credits the shorter W-0154, of length $93\,904\,708\,660$, to Pantone~\cite{w154}. It is 31,071 letters shorter than the rearranged W-0135. Combining W-0154 with Theorem~\ref{thm:fourteen-lower} leaves a difference of $13\,567\,503$ between the endpoints. The exact value of $L(14)$ remains open.
+
+\section{Verification and research contributions}
+The accompanying archive contains the forbidden factors, transition and potential tables, Lean sources and toolchain specifications, both W-0135 and its rearranged successor, the patch, the independent word checkers and reference outputs. The lower theorem is stated for an arbitrary word on \texttt{Fin 14}. Its recorded axiom inventory consists of propositional extensionality, classical choice and quotient soundness. The direct scan of the project's upper construction checks the decoded word independently of the hypotheses of \texttt{UpperNext.patched}. The upper endpoint from W-0154 uses its published Almanac verification. The W-0135 derivative retains the CC BY 4.0 attribution to Halfar and the source credit to Pantone's W-0127~\cite{almanac}. The changes are the reordering of pieces and the new joins specified in Section~\ref{sec:construction}.
+
+\paragraph{Research contributions and use of AI.}
+Jaehun Jung set the research question, directed the investigations and specified the standard of verification. OpenAI Codex (GPT-6) was used to develop proof arguments, write Lean and verification code, perform computational experiments, and draft the manuscript. Pantone's formalization and its inherited results, and the starting words and subsequent public record, are credited to their original contributors.
+
+\begin{thebibliography}{9}
+\bibitem{houston} R. Houston, \emph{Tackling the Minimal Superpermutation Problem}, arXiv:1408.5108 (2014). \href{https://arxiv.org/abs/1408.5108}{Preprint}.
+\bibitem{pantone} J. Pantone, \emph{Lower bounds for superpermutations}, formal development and finite lower-bound manuscript, revision \texttt{ad72ab5} (2026). \href{https://github.com/jaypantone/2026-10-superpermutation-lower-palomar/tree/ad72ab5010e945b5c8768a918281778c834dcc40}{Source and manuscript}.
+\bibitem{almanac} J. Halfar, W-0135, a fourteen-symbol construction derived from J. Pantone's W-0127, \emph{Superpermutation Almanac}, 21 November 2026. \href{https://superpermutations.com/w/W-0135}{Word and provenance}; \href{https://creativecommons.org/licenses/by/4.0/}{CC BY 4.0}.
+\bibitem{w154} J. Pantone, W-0154, \emph{Superpermutation Almanac}, 22 November 2026. \href{https://superpermutations.com/w/W-0154}{Word and coverage statistics}; \href{https://superpermutations.com/n/14}{fourteen-symbol bounds}, accessed 24 November 2026.
+\end{thebibliography}
+\end{document}
